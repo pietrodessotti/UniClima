@@ -3,6 +3,7 @@ package br.uninove.uniclima.http;
 import br.uninove.uniclima.tempo.Tempo;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,14 +15,14 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 public class Http {
-    
+
     private static String readAll(Reader rd) throws IOException {
         StringBuilder sb = new StringBuilder();
         int cp;
-           while ((cp = rd.read()) != -1) {
-               sb.append((char)cp);
-           }
-        
+        while ((cp = rd.read()) != -1) {
+            sb.append((char)cp);
+        }
+
         return sb.toString();
     }
     
@@ -30,10 +31,9 @@ public class Http {
         try {
             String charset = StandardCharsets.UTF_8.name();
             String url = "http://api.openweathermap.org/data/2.5/weather?";
-            String appid = "7de944be0869b7700dfbc765bbc87adc";
+            String appid = "7de944be0869b7700dfbc765bbc87adc"; // COLAR SUA CHAVE DE API
             String units = "metric";
             String lang = "pt_br";
-            
             
             String params = String.format("q=%s&appid=%s&units=%s&lang=%s",
                         URLEncoder.encode(cidade, charset),
@@ -48,18 +48,23 @@ public class Http {
             conn.setRequestProperty("Accept-Charset", charset);
             conn.setRequestProperty("Content-Type", "application/json; charset=utf-8");
             
-            Tempo clima = null;
+            Tempo clima;
+            
             try(InputStream response = conn.getInputStream()) {
-               BufferedReader buffer = new BufferedReader(
-                        new InputStreamReader(response, Charset.forName("UTF-8"))); }
+                BufferedReader buffer = new BufferedReader(
+                        new InputStreamReader(response, Charset.forName("UTF-8")));
                 String json = readAll(buffer);
                 Gson gson = new Gson();
                 clima = gson.fromJson(json, Tempo.class);
-                
+            }
+            
+            return clima;
+            
         } catch(JsonSyntaxException | IOException e) {
             e.printStackTrace();
         }
         
         return null;
     }
+
 }
